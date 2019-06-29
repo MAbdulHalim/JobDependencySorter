@@ -66,5 +66,18 @@ namespace Tests
             // Assert
             output.ShouldBe("a");
         }
+
+        [Test]
+        public void ProcessJobs_OnPassingJobsWithNoDependency_ReturnStringJobs()
+        {
+            // Arrange
+            var inputString = new[] { "a => ", "b => ", "c => " };
+
+            // Act
+            var output = TestObject.ProcessJobs(inputString);
+
+            // Assert
+            output.ShouldBe("abc");
+        }
     }
 }
