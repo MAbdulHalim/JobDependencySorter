@@ -58,7 +58,7 @@ namespace Tests
         public void ProcessJobs_OnPassingOneJobWithNoDependencyAndEmptyString_ReturnStringOfSingleJob()
         {
             // Arrange
-            var inputString = new[] { "a =>", string.Empty };
+            var inputString = new[] { "a => ", string.Empty };
 
             // Act
             var output = TestObject.ProcessJobs(inputString);
