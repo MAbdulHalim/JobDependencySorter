@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace JobDependencySorter
@@ -17,20 +18,20 @@ namespace JobDependencySorter
         public string ProcessJobs(string[] jobs)
         {
             var jobList = new List<Job>();
-            foreach (var jobString in jobs)
+            try
             {
-                try
+                foreach (var jobString in jobs)
                 {
                     jobList.Add(ParseJobString(jobString));
                 }
-                catch (Exception ex)
-                {
-                    return ex.Message;
-                }
+                var sortedJobs = SortJobs(jobList);
+                var output = PrintJobs(sortedJobs);
+                return output;
             }
-            var sortedJobs = SortJobs(jobList);
-            var output = PrintJobs(sortedJobs);
-            return output;
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace JobDependencySorter
             {
                 return new Job(splittedJob[0], null);
             }
-            if(splittedJob[0] == splittedJob[1])
+            if (splittedJob[0] == splittedJob[1])
             {
                 throw new Exception($"Job {splittedJob[0]} can not have dependency on it self");
             }
@@ -62,21 +63,54 @@ namespace JobDependencySorter
         }
 
         /// <summary>
-        /// Takes a list of unsorted Jobs and sort them based on their dependency
+        /// Takes a list of unsorted Jobs and sort them based on their dependency, 
+        /// more info: https://en.wikipedia.org/wiki/Topological_sorting
         /// </summary>
         /// <param name="jobs">List of Jobs</param>
         /// <returns>List of Jobs sorted</returns>
         private List<Job> SortJobs(List<Job> jobs)
         {
             var sortedJobs = new List<Job>();
+            var visitedJobs = new List<Job>();
             foreach (var job in jobs)
             {
-                if (string.IsNullOrWhiteSpace(job.Dependency))
-                {
-                    sortedJobs.Add(job);
-                }
+                VisitJob(job, sortedJobs, visitedJobs, jobs);
             }
             return sortedJobs;
+        }
+
+        /// <summary>
+        /// Goes through every job dependency and it to the sorted list and mark this job as visited
+        /// </summary>
+        /// <param name="job">the job object to get its dependency</param>
+        /// <param name="sortedJobs">list of sorted jobs</param>
+        /// <param name="visitedJobs">list of visited jobs</param>
+        /// <param name="unsortedJobs">list of unsorted jobs(the original ones)</param>
+        private void VisitJob(Job job, List<Job> sortedJobs, List<Job> visitedJobs, List<Job> unsortedJobs)
+        {
+            // job already visited before, return unless there is circular dependencies
+            if (visitedJobs.Any(x => x.Name.Equals(job.Name)))
+            {
+                // if not exist in the sorted list, then circular dependencies found
+                if (!sortedJobs.Any(x => x.Name.Equals(job.Name)))
+                {
+                    throw new Exception("Jobs can’t have circular dependencies");
+                }
+                return;
+            }
+            visitedJobs.Add(job);
+
+            // visit the job's dependency (in case it has) and add it to the sorted list first
+            if (!string.IsNullOrWhiteSpace(job.Dependency))
+            {
+                var dependencyJob = unsortedJobs.Where(x => x.Name == job.Dependency).FirstOrDefault();
+                if (dependencyJob != null)
+                {
+                    VisitJob(dependencyJob, sortedJobs, visitedJobs, unsortedJobs);
+                }
+            }
+            // add the current job to the sorted list after looping through its dependencies
+            sortedJobs.Add(job);
         }
 
         /// <summary>

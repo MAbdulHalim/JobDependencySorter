@@ -32,13 +32,13 @@ namespace Tests
         public void ProcessJobs_OnPassingOneJobWithSelfDependency_ReturnStringWithError()
         {
             // Arrange
-            var inputString = new[] { "a => a" };
+            var inputString = new[] { "a =>", "b =>", "c => c" };
 
             // Act
             var output = TestObject.ProcessJobs(inputString);
 
             // Assert
-            output.ShouldContain("Job a can not have dependency on it self");
+            output.ShouldContain("Job c can not have dependency on it self");
         }
 
         [Test]
@@ -78,6 +78,45 @@ namespace Tests
 
             // Assert
             output.ShouldBe("abc");
+        }
+
+        [Test]
+        public void ProcessJobs_OnPassingJobsWithOneDependency_ReturnStringJobs()
+        {
+            // Arrange
+            var inputString = new[] { "a => ", "b => c", "c => " };
+
+            // Act
+            var output = TestObject.ProcessJobs(inputString);
+
+            // Assert
+            output.ShouldBe("acb");
+        }
+
+        [Test]
+        public void ProcessJobs_OnPassingJobsWithMutipleDependency_ReturnStringJobs()
+        {
+            // Arrange
+            var inputString = new[] { "a => ", "b => c", "c => f", "d => a", "e => b", "f => " };
+
+            // Act
+            var output = TestObject.ProcessJobs(inputString);
+
+            // Assert
+            output.ShouldBe("afcbde");
+        }
+
+        [Test]
+        public void ProcessJobs_OnPassingJobsWithCircularDependency_ReturnErrorString()
+        {
+            // Arrange
+            var inputString = new[] { "a => ", "b => c", "c => f", "d => a", "e => ", "f => b" };
+
+            // Act
+            var output = TestObject.ProcessJobs(inputString);
+
+            // Assert
+            output.ShouldBe("Jobs can’t have circular dependencies");
         }
     }
 }
