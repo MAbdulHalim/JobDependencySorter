@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace JobDependencySorter
 {
@@ -9,15 +10,23 @@ namespace JobDependencySorter
         static void Main(string[] args)
         {
             Console.WriteLine($"Input your jobs here line by line in this formt \"a => b\" " +
-                $"(type {EXIT_STRING} to terminate): ");
-            var line = string.Empty;
+                $"(type {EXIT_STRING} to terminate & porcess the jobs): ");
+            var jobs = new List<string>();
+            // reading job list entries
+            string line;
             while ((line = Console.ReadLine()) != null)
             {
                 if (line.ToUpper() == EXIT_STRING)
                 {
+                    Console.WriteLine("Processing jobs, and the output is:");
                     break;
                 }
+                jobs.Add(line);
             }
+            var jobSorter = new JobSorter();
+            Console.WriteLine(jobSorter.ProcessJobs(jobs.ToArray()));
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
         }
     }
 }

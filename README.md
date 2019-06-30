@@ -1,4 +1,8 @@
-# JobDependencySorter
+# Job Dependency Sorter
+
+##### The code is developed using .NET Core 2.2, please build the project first to restore packages
+##### The project is Unit Tested using NUnit and [Shouldly](https://github.com/shouldly/shouldly) as an assertion framework, please check `JobDependencySorter.UnitTests`
+
 Imagine we have a list of jobs, each represented by a character. Because certain jobs must be done before others, a job may have a dependency on another job. For example, a may depend on b, meaning the final sequence of jobs should place b before a. If a has no dependency, the position of a in the final sequence does not matter.
 
 * Given you’re passed an empty string (no jobs), the result should be an empty sequence.

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JobDependencySorter.Model;
 
 namespace JobDependencySorter
 {
@@ -46,18 +47,18 @@ namespace JobDependencySorter
                 return new Job(string.Empty, null);
             }
             var splittedJob = job.Split("=>", StringSplitOptions.RemoveEmptyEntries);
-            // trim spaces at the beginning / end of each string
+            // trim spaces at the beginning/end of each job. "a " will be "a"
             for (int i = 0; i < splittedJob.Length; i++)
             {
                 splittedJob[i] = splittedJob[i].Trim();
             }
-            if (splittedJob.Length == 1)
+            if (splittedJob.Length == 1) // job has no dependency
             {
                 return new Job(splittedJob[0], null);
             }
             if (splittedJob[0] == splittedJob[1])
             {
-                throw new Exception($"Job {splittedJob[0]} can not have dependency on it self");
+                throw new Exception($"Job {splittedJob[0]} can not have dependency on itself");
             }
             return new Job(splittedJob[0], splittedJob[1]);
         }
@@ -80,7 +81,7 @@ namespace JobDependencySorter
         }
 
         /// <summary>
-        /// Goes through every job dependency and it to the sorted list and mark this job as visited
+        /// Goes through every job dependency and add it to the sorted list and mark this job as visited
         /// </summary>
         /// <param name="job">the job object to get its dependency</param>
         /// <param name="sortedJobs">list of sorted jobs</param>
@@ -106,6 +107,7 @@ namespace JobDependencySorter
                 var dependencyJob = unsortedJobs.Where(x => x.Name == job.Dependency).FirstOrDefault();
                 if (dependencyJob != null)
                 {
+                    // recursive loop for all related dependencies
                     VisitJob(dependencyJob, sortedJobs, visitedJobs, unsortedJobs);
                 }
             }
